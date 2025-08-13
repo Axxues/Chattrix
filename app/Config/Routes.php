@@ -15,8 +15,11 @@ $routes->get('server', 'Server');
 
 $routes->get('t/(:num)', 'ChatNavigation::view/$1');
 
-$routes->POST('t/messages/send', 'SendMessage::send');
-$routes->POST('t/messages/fetch', 'FetchMessage::fetch');
+$routes->post('t/messages/send', 'MessageDetails::send');
+$routes->post('t/messages/fetch', 'MessageDetails::fetch');
+$routes->post('t/messages/is_typing', 'IsTypingStatus::is_typing');
+$routes->post('t/messages/update_time', 'MessageDetails::updateTime');
+$routes->post('t/messages/idle_time', 'MessageDetails::getIdleTime');
 
 
 $routes->get('test', 'MessageTest::index');

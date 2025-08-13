@@ -16,8 +16,10 @@
       <?php if (!empty($users) && is_array($users)): ?>
       <div id="chat-list" class="chat-list">
         <!-- user lists -->
-        <?php foreach($users as $user): ?>
-        <div id="friends" class="friends"  onclick="window.location.href='<?= site_url('t/' . $user['user_admin_id']) ?>'" style="cursor: pointer;">
+        <?php foreach($users as $user): 
+          if(!($user['user_admin_id'] == session()->get('loggedUser'))) :
+        ?>
+        <div id="friends<?= $user['user_admin_id'] ?>" class="friends"  onclick="window.location.href='<?= site_url('t/' . $user['user_admin_id']) ?>'" style="cursor: pointer;">
           <!-- photo -->
           <div class="profile friends-photo">
             <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
@@ -32,7 +34,10 @@
           <!-- notification badge -->
           <span class="badge notif-badge">7</span>
         </div>
-        <?php endforeach; ?>
+        <?php 
+        endif;
+        endforeach; 
+        ?>
       </div>
       <?php else: ?>
         <p>No friends found!</p>
@@ -47,10 +52,9 @@
         <h4 class="name your-name">Iqbal Taufiq</h4>
         <!-- setting btn -->
         <span class="glyphicon glyphicon-cog"></span>
+        
       </div>
     </section>
-
-
 
     <!-- RIGHT SECTION -->
 
@@ -76,65 +80,15 @@
 
       <!-- chat area -->
       <div id="chat-area" class="chat-area">
-        <!-- chat content -->
-
-        <!-- FRIENDS CHAT TEMPLATE -->
-        <div id="chat-template" class="friends-chat">
-          <div class="profile friends-chat-photo">
-            <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
-          </div>
-          <div class="friends-chat-content">
-            <p class="friends-chat-name"><?= htmlspecialchars($friend['first_name']) ?> <?= htmlspecialchars($friend['last_name']) ?></p>
-            <p class="friends-chat-balloon">Yo Dybala!</p>
-            <h5 class="chat-datetime">Sun, Aug 30 | 15:41</h5>
-          </div>
-        </div>
-
         
-        <!-- YOUR CHAT TEMPLATE -->
-        <!-- <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div>
-        <div id="chat-template" class="your-chat">
-          <p class="your-chat-balloon">'sup</p>
-          <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> Sun, Aug 30 | 15:45</p>
-        </div> -->
+        <!-- chat content -->
 
       </div>
 
       <!-- typing area -->
       <div id="typing-area" class="typing-area">
         <!-- input form -->
-        <input id="message_text" class="type-area" placeholder="Type something...">
+        <input id="message_text" class="type-area" onfocus="user_typing('focus')" onblur="user_typing('blur')" onkeydown="if(event.key==='Enter'){ send_message(event); }" placeholder="Type something...">
         <!-- attachment btn -->
         <div class="attach-btn">
           <span class="glyphicon glyphicon-paperclip file-btn"></span>

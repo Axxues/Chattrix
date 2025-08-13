@@ -21,6 +21,13 @@ class AuthFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Do something here
+        $response->setHeader('Content-Security-Policy', 
+            "default-src 'self'; 
+            script-src 'self' https://cdnjs.cloudflare.com https://code.jquery.com; 
+            style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; 
+            font-src 'self' https://fonts.gstatic.com; 
+            img-src 'self' data:; 
+            frame-ancestors 'none';"
+        );
     }
 }

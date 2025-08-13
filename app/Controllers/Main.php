@@ -22,9 +22,6 @@ class Main extends BaseController
     }
     public function chat_page()
     {
-        // if (!session()->get('loggedUser')) {
-        //     return redirect()->to('sign_in')->with('fail', 'You must be logged in to access that page.');
-        // } else {
         $userModel = new FriendsModel();
 
         $users = $userModel->findAll();

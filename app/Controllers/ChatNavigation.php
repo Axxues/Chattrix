@@ -8,6 +8,17 @@ use App\Models\FriendsModel;
 
 class ChatNavigation extends BaseController
 {
+    public function _remap($method, ...$params){
+        if(method_exists($this, $method)){
+            return $this->$method($params);
+        } else {
+            return $this->show404();
+        }
+    }
+
+    public function show404(){
+        return view('404.php');
+    }
     public function view($id)
     {
         $userModel = new FriendsModel();

@@ -129,6 +129,20 @@ html, body {
     color: #555;
 }
 
+.active-badge {
+    place-self: center;
+    background: green;
+    color: green;
+    margin-right: 20px;
+}
+
+.inactive-badge {
+    place-self: center;
+    background: white;
+    color: #555;
+    margin-right: 10px;
+}
+
 .self-info {
     /* border: 5px solid magenta; */
     padding: 5px;

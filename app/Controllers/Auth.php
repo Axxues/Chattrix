@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 use App\Libraries\Hash;
+use App\Models\UsersModel;
+use App\Models\LoginDetails;
+
 
 class Auth extends BaseController
 {
@@ -98,14 +101,15 @@ class Auth extends BaseController
                 'email'=>$email,
                 'password'=>Hash::make($password)
             ];
-            $usersModel = new \App\Models\UsersModel();
+
+            //---------------------------Adding new users---------------------------
+            $usersModel = new UsersModel();
             $query = $usersModel->insert($values);
             if(!$query){
                 return redirect()->to('sign_up')->with('fail', 'Something went wrong!');
             } else {
                 return redirect()->to('sign_up')->with('success', 'The account has been registered successfully!');
             }
-
         }
     }
 
@@ -134,15 +138,30 @@ class Auth extends BaseController
         } else {
             $email = htmlspecialchars($this->request->getPost('email'));
             $password = htmlspecialchars($this->request->getPost('password'));
-            $usersModel = new \App\Models\UsersModel();
+            $usersModel = new UsersModel();
             $user_info = $usersModel->where('email', $email)->first();
             $check_password = Hash::check($password, $user_info['password']);
 
             if(!$check_password){
                 return redirect()->to('sign_in')->with('fail', 'Incorrect password!');
             } else {
+                //---------------------------Adding new user login details---------------------------
+                $loginDetails = new LoginDetails();
+                $login_info = $loginDetails->where('user_admin_id', $user_info['user_admin_id'])->first();
+                if(!$login_info){
+                    $loginDetails->insert([
+                        'user_admin_id'=>$user_info['user_admin_id']
+                    ]);
+                } else {
+                    
+                }
+                //---------------------------Adding new user login details ends---------------------------
+
                 $user_id = $user_info['user_admin_id'];
+                $user_name = $user_info['first_name'] . ' ' . $user_info['last_name'];
+
                 session()->set('loggedUser', $user_id);
+                session()->set('userName', $user_name);
                 return redirect()->to('chat');
             }
         }
