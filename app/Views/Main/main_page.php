@@ -21,18 +21,18 @@
         ?>
         <div id="friends<?= $user['user_admin_id'] ?>" class="friends"  onclick="window.location.href='<?= site_url('t/' . $user['user_admin_id']) ?>'" style="cursor: pointer;">
           <!-- photo -->
-          <div class="profile friends-photo">
+          <div class="profile friends-photo profie-picture">
             <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
           </div>
           
-          <div class="friends-credent">
+          <div id="user-information<?= $user['user_admin_id'] ?>" class="friends-credent profile-name">
             <!-- name -->
             <span class="friends-name"><?= $user['first_name'] ?> <?= $user['last_name'] ?></span>
             <!-- last message -->
-            <span class="friends-message">Crap! I forgot my shoes. Can you bring extra pair for me?</span>
+
           </div>
           <!-- notification badge -->
-          <span class="badge notif-badge">7</span>
+          
         </div>
         <?php 
         endif;
@@ -49,7 +49,7 @@
           <img src="<?php echo base_url('public/assets/images/ava4.jpg'); ?>" alt="">
         </div>
         <!-- name -->
-        <h4 class="name your-name">Iqbal Taufiq</h4>
+        <h4 class="name your-name"><?= session()->get('userName') ?></h4>
         <!-- setting btn -->
         <span class="glyphicon glyphicon-cog"></span>
         

@@ -3,9 +3,11 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\MessagesModel;
+use App\Models\UnreadMessagesView;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\LoginDetails;
 use App\Models\MinutesIdleView;
+use App\Models\LatestMessagesView;
 
 class MessageDetails extends BaseController
 {
@@ -40,6 +42,9 @@ class MessageDetails extends BaseController
         // echo 'Receiver Id: ' . $receiver;
 
         $messagesModel = new MessagesModel();
+
+        $messagesModel->where('sender', $receiver)->where('receiver', $sender)->where('is_seen', 0)->set('is_seen', 1)->update();
+
         $message_log = $messagesModel->groupStart()
         ->where('receiver', $receiver)
         ->where('sender', $sender)
@@ -104,7 +109,20 @@ class MessageDetails extends BaseController
 
         $minutesIdleView = new MinutesIdleView();
         $active_minutes = $minutesIdleView->whereIn('user_admin_id', $users_id)->where('user_admin_id !=', $user_id)->findAll();
-        return $this->response->setJSON($active_minutes);
+
+        $unreadMessagesView = new UnreadMessagesView();
+        $unread_messages = $unreadMessagesView->findAll();
+
+        $latestMessagesView = new LatestMessagesView();
+        $latest_messages = $latestMessagesView->findAll();
+
+        $result = [
+            'active_minutes' => $active_minutes,
+            'unread_messages' => $unread_messages,
+            'latest_messages' => $latest_messages
+        ];
+
+        return $this->response->setJSON($result);
 
         // if($active_minutes){
         //     return $this->response->setJSON($active_minutes);

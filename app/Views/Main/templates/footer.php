@@ -2,21 +2,21 @@
     <p>&copy; 2020 | Created by <span>Iqbal Taufiq</span></p>
   </div>
   <script>
+    let initialScroll = false;
+    let previous_last_id = 0;
 
-    //------------------------Sending and Receiving Messages Start------------------------
-    window.onload = function() {//Function to load messages right away whenever you change chatbox
-      fetch_message();
+    $(function() {
+      fetch_message();       // Load messages
       activeStatus();
-    };
+    });
 
     function chatUpdates() {
     fetch_message();
-    getUsersActiveStatus();
+    getUsersStatus();
     }
 
     function activeStatus(){
       updateTimestamp();
-      
     }
 
     setInterval(chatUpdates, 1000);
@@ -40,7 +40,7 @@
               $('#message_text').val('');
               fetch_message();
               setTimeout(function() {
-              $('#chat-area').scrollTop($('#chat-area')[0].scrollHeight);
+              autoScrollIfAtBottom();
 
             }, 200);
           },
@@ -68,15 +68,28 @@
             var jsonData = response.message_log;
             const container = $('#chat-area');
             container.empty();
+            const seen = `glyphicon-ok-sign`;
+            const not_seen = `glyphicon-ok-circle`;
+            let last_id = 0;
 
             jsonData.forEach(function(message) {
               if(message.sender == '<?= session()->get('loggedUser') ?>'){
-                container.append(`
-                  <div id="chat-template" class="your-chat">
-                    <p class="your-chat-balloon">${message.message}</p>
-                    <p class="chat-datetime"><span class="glyphicon glyphicon-ok"></span> ${message.created_at} </p>
-                  </div>
-                `);
+                if(message.is_seen == '1'){
+                  container.append(`
+                    <div id="chat-template" class="your-chat">
+                      <p class="your-chat-balloon">${message.message}</p>
+                        <p class="chat-datetime"><span class="glyphicon glyphicon-ok-sign"></span> ${message.created_at} </p>
+                    </div>
+                  `);
+                } else {
+                  container.append(`
+                    <div id="chat-template" class="your-chat">
+                      <p class="your-chat-balloon">${message.message}</p>
+                        <p class="chat-datetime"><span class="glyphicon glyphicon-ok-circle"></span> ${message.created_at} </p>
+                    </div>
+                  `);
+                }
+                
               } else {
                   container.append(`
                     <div id="chat-template" class="friends-chat">
@@ -91,44 +104,54 @@
                     </div>
                 `);
               }
+              last_id = message.messages_id;
                     
             });
 
             //-----------------------------User Typing...-----------------------------
             var userData = response.user_log;
             if(userData.is_typing == 1){
-              if($('#friend_typing').length) {
-                $('#chat-area').append(`
-                    <div id="friend_typing" class="friends-chat">
-                      <div class="profile friends-chat-photo">
-                        <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
+              if(userData.is_typing_to == <?= session()->get('loggedUser') ?>){
+                if($('#friend_typing').length) {
+                  $('#chat-area').append(`
+                      <div id="friend_typing" class="friends-chat">
+                        <div class="profile friends-chat-photo">
+                          <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
+                        </div>
+                        <div class="friends-chat-content">
+                          <p class="friends-chat-name"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?></p>
+                          <p class="friends-chat-balloon">Typing...</p>
+                        </div>
                       </div>
-                      <div class="friends-chat-content">
-                        <p class="friends-chat-name"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?></p>
-                        <p class="friends-chat-balloon">Typing...</p>
+                  `);
+                } else {
+                  $('#chat-area').append(`
+                      <div id="friend_typing" class="friends-chat">
+                        <div class="profile friends-chat-photo">
+                          <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
+                        </div>
+                        <div class="friends-chat-content">
+                          <p class="friends-chat-name"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?></p>
+                          <p class="friends-chat-balloon"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?> is Typing...</p>
+                        </div>
                       </div>
-                    </div>
-                `);
-              } else {
-                $('#chat-area').append(`
-                    <div id="friend_typing" class="friends-chat">
-                      <div class="profile friends-chat-photo">
-                        <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
-                      </div>
-                      <div class="friends-chat-content">
-                        <p class="friends-chat-name"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?></p>
-                        <p class="friends-chat-balloon"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?> is Typing...</p>
-                      </div>
-                    </div>
-                `);
+                  `);
+                }
+                // $('#chat-area').scrollTop($('#chat-area')[0].scrollHeight);
+                $("#chat-area").animate({ scrollTop: $('#chat-area')[0].scrollHeight }, 'fast');
               }
+              
             } else if (userData.is_typing == 0){
                 if($('#friend_typing').length) {
                   $('#friend_typing').remove();
                 }
             }
-            
-            $('#chat-area').scrollTop($('#chat-area')[0].scrollHeight);
+            scrollOnce();
+            if(previous_last_id != last_id){
+              autoScrollIfAtBottom();
+              previous_last_id = last_id;
+            }
+
           },
           
           error: function(error){
@@ -142,13 +165,15 @@
 
     function user_typing(e){
       const user_id = <?= session('loggedUser') ?>;
+      let friend_id = <?= isset($friend)? $friend['user_admin_id'] : 0 ?>;
       let is_typing = (e === 'focus') ? 1 : 0;
       $.ajax({
         type: "POST",
         url: "messages/is_typing",
         data:{
           is_typing: is_typing,
-          user_id: user_id
+          user_id: user_id,
+          friend_id: friend_id
 
         },
         success: function(data){
@@ -184,7 +209,7 @@
         });
     }
 
-    function getUsersActiveStatus(){
+    function getUsersStatus(){
       const user_id = <?= session()->get('loggedUser') ?>;
       const users_id = <?= isset($users) ? json_encode($users) : '[]' ?>;
       // users.forEach(function(user_id){
@@ -201,34 +226,67 @@
         },
         success: function(data){
           var jsonData = data;
-          jsonData.forEach(function(minutes) {
-            if(minutes.minutes_idle < 5){
-              if($('#friends-inactive-status' + minutes.user_admin_id).length){
-                $('#friends-inactive-status' + minutes.user_admin_id).remove();
+
+          jsonData.latest_messages.forEach(function(friend_details){
+            if(friend_details.receiver == <?= session()->get('loggedUser') ?>){
+              if(friend_details.message != null || friend_details.files != null){
+                if($('#user-information-latest-message' + friend_details.sender).length){
+                  $('#user-information-latest-message' + friend_details.sender).remove();
+                }
+                if(friend_details.is_seen == 0){
+                  $('#user-information' + friend_details.sender).append(`
+                    <span id="user-information-latest-message` + friend_details.sender + `" class="friends-message-not-seen"><b>${friend_details.message}</b></span>
+                  `);
+                } else {
+                  $('#user-information' + friend_details.sender).append(`
+                    <span id="user-information-latest-message` + friend_details.sender + `" class="friends-message">${friend_details.message}</span>
+                  `);
+                }
+                
               }
-              if($('#friends-active-status' + minutes.user_admin_id).length){
-                $('#friends-active-status' + minutes.user_admin_id).remove();
-                $('#friends' + minutes.user_admin_id).append(`
-                <span id="friends-active-status` +  minutes.user_admin_id + `" class="badge active-badge">A</span>
-                `);
-              } else {
-                $('#friends' + minutes.user_admin_id).append(`
-                <span id="friends-active-status` +  minutes.user_admin_id + `" class="badge active-badge">A</span>
+            }
+          });
+          jsonData.unread_messages.forEach(function(friend_details) {
+            if(friend_details.receiver == <?= session()->get('loggedUser') ?>){
+              if(friend_details.unread_messages > 0){
+                if($("#unread-messages-count" + friend_details.sender).length){
+                  $("#unread-messages-count" + friend_details.sender).remove();
+                }
+                $('#friends' + friend_details.sender).append(`
+                <span id="unread-messages-count${friend_details.sender}" class="badge notif-badge profile-unread-message">${friend_details.unread_messages}</span>
                 `);
               }
+            }
+          });
+
+          jsonData.active_minutes.forEach(function(friend_details) {
+            if(friend_details.minutes_idle < 5){
+              if($('#friends-inactive-status' + friend_details.active_user_admin_id).length){
+                $('#friends-inactive-status' + friend_details.user_admin_id).remove();
+              }
+              if($('#friends-active-status' + friend_details.user_admin_id).length){
+                $('#friends-active-status' + friend_details.user_admin_id).remove();
+              }
+              $('#friends' + friend_details.user_admin_id).append(`
+              <span id="friends-active-status${friend_details.user_admin_id}" class="badge active-badge profile-status">A</span>
+              `);
             } else {
-              if($('#friends-active-status' + minutes.user_admin_id).length > 0){
-                $('#friends-active-status' + minutes.user_admin_id).remove();
+              if($('#friends-active-status' + friend_details.user_admin_id).length > 0){
+                $('#friends-active-status' + friend_details.user_admin_id).remove();
               }
-              if($('#friends-inactive-status' + minutes.user_admin_id).length){
-                $('#friends-inactive-status' + minutes.user_admin_id).remove();
-                $('#friends' + minutes.user_admin_id).append(`
-                <span id="friends-inactive-status` +  minutes.user_admin_id + `" class="badge inactive-badge">` +  minutes.minutes_idle + `m</span>`);
-              } else {
-                $('#friends' + minutes.user_admin_id).append(`
-                <span id="friends-inactive-status` +  minutes.user_admin_id + `" class="badge inactive-badge">` + minutes.minutes_idle + `m</span>
-                `);
+              if($('#friends-inactive-status' + friend_details.user_admin_id).length){
+                $('#friends-inactive-status' + friend_details.user_admin_id).remove();
               }
+                if(friend_details.minutes_idle < 60){
+                  $('#friends' + friend_details.user_admin_id).append(`
+                  <span id="friends-inactive-status${friend_details.user_admin_id}" class="badge inactive-badge profile-status">${friend_details.minutes_idle}m</span>`);
+                } else if(friend_details.minutes_idle > 59 && friend_details.minutes_idle < 1440){
+                  $('#friends' + friend_details.user_admin_id).append(`
+                  <span id="friends-inactive-status${friend_details.user_admin_id}" class="badge inactive-badge profile-status">` +  Math.floor(friend_details.minutes_idle / 60) + `h</span>`);
+                } else if(friend_details.minutes_idle >= 1440){
+                  $('#friends' + friend_details.user_admin_id).append(`
+                  <span id="friends-inactive-status${friend_details.user_admin_id}" class="badge inactive-badge profile-status">` +  Math.floor((friend_details.minutes_idle / 60)/12) + `d</span>`);
+                }
             }
           });
           
@@ -241,19 +299,26 @@
         });
     }
 
-  //   function getCurrentTimestamp() {
-  //   const now = new Date();
+    //-------------------------------Autoscroll function--------------------------------
+    function autoScrollIfAtBottom() {
+      const $container = $("#chat-area");
+      const scrollThreshold = 71; // Pixels from bottom to consider "at bottom"
 
-  //   const year = now.getFullYear();
-  //   const month = String(now.getMonth() + 1).padStart(2, '0');
-  //   const day = String(now.getDate()).padStart(2, '0');
+      // Check if user is near the bottom
+      const isNearBottom = $container.scrollTop() + $container.innerHeight() + scrollThreshold >= $container[0].scrollHeight;
 
-  //   const hours = String(now.getHours()).padStart(2, '0');
-  //   const minutes = String(now.getMinutes()).padStart(2, '0');
-  //   const seconds = String(now.getSeconds()).padStart(2, '0');
+      // Auto-scroll only if at bottom
+      if (isNearBottom) {
+        $container.animate({ scrollTop: $container[0].scrollHeight }, 'fast');
+      }
+    }
 
-  //   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  // }
+    function scrollOnce(){
+      if(!initialScroll){
+        $('#chat-area').scrollTop($('#chat-area')[0].scrollHeight);
+        initialScroll = true;
+      }
+    }
 
       
   </script>
