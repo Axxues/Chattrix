@@ -41,6 +41,7 @@ FACEBOOK: https://www.facebook.com/themefisher
   <link rel="stylesheet" href="<?php echo base_url('public/assets/plugins/slick/slick-theme.css'); ?>">
   <link rel="stylesheet" href="<?php echo base_url('public/assets/plugins/fancybox/jquery.fancybox.min.css'); ?>">
   <link rel="stylesheet" href="<?php echo base_url('public/assets/plugins/aos/aos.css'); ?>">
+  <link rel="stylesheet" href="<?php echo base_url('public/assets/css/homepage.css'); ?>">
 
   <!-- CUSTOM CSS -->
   <link href="<?php echo base_url('public/assets/css/style.css'); ?>" rel="stylesheet">

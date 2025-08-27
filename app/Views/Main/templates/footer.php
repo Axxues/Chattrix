@@ -1,9 +1,11 @@
-<div id="creator" class="creator">
-    <p>&copy; 2020 | Created by <span>Iqbal Taufiq</span></p>
-  </div>
+
+
   <script>
     let initialScroll = false;
     let previous_last_id = 0;
+
+    let isFriendInfoToggled = false;
+    let isProfileInfoToggled = false;
 
     $(function() {
       fetch_message();       // Load messages
@@ -37,10 +39,11 @@
             message: message_text.val()
           },
           success: function(data){
+            message_text.blur();
               $('#message_text').val('');
               fetch_message();
               setTimeout(function() {
-              autoScrollIfAtBottom();
+              autoScrollIfAtBottom(71);
 
             }, 200);
           },
@@ -76,16 +79,14 @@
               if(message.sender == '<?= session()->get('loggedUser') ?>'){
                 if(message.is_seen == '1'){
                   container.append(`
-                    <div id="chat-template" class="your-chat">
-                      <p class="your-chat-balloon">${message.message}</p>
-                        <p class="chat-datetime"><span class="glyphicon glyphicon-ok-sign"></span> ${message.created_at} </p>
+                    <div id="chat-template${message.messages_id}" class="your-chat">
+                      <p class="your-chat-balloon fetch-chat" onmouseover="messageTimestamp('${message.created_at}', ${message.messages_id})" onmouseout="messageTimestampRemove(${message.messages_id})">${message.message}<span class="glyphicon glyphicon-ok-sign"></span></p>
                     </div>
                   `);
                 } else {
                   container.append(`
-                    <div id="chat-template" class="your-chat">
-                      <p class="your-chat-balloon">${message.message}</p>
-                        <p class="chat-datetime"><span class="glyphicon glyphicon-ok-circle"></span> ${message.created_at} </p>
+                    <div id="chat-template${message.messages_id}" class="your-chat">
+                      <p class="your-chat-balloon fetch-chat" onmouseover="messageTimestamp('${message.created_at}', ${message.messages_id})" onmouseout="messageTimestampRemove(${message.messages_id})">${message.message}<span class="glyphicon glyphicon-ok-sign"></span></p>
                     </div>
                   `);
                 }
@@ -96,10 +97,9 @@
                       <div class="profile friends-chat-photo">
                         <img src="<?php echo base_url('public/assets/images/ava2.jpg'); ?>" alt="">
                       </div>
-                      <div class="friends-chat-content">
+                      <div id="chat-template${message.messages_id}" class="friends-chat-content">
                         <p class="friends-chat-name"><?= isset($friend) ? htmlspecialchars($friend['first_name']) : 0 ?> <?= isset($friend) ? htmlspecialchars($friend['last_name']) : 0 ?></p>
-                        <p class="friends-chat-balloon">${message.message}</p>
-                        <h5 class="chat-datetime">${message.created_at}</h5>
+                        <p class="friends-chat-balloon fetch-chat" onmouseover="messageTimestamp('${message.created_at}', ${message.messages_id})" onmouseout="messageTimestampRemove(${message.messages_id})">${message.message}</p>
                       </div>
                     </div>
                 `);
@@ -110,7 +110,7 @@
 
             //-----------------------------User Typing...-----------------------------
             var userData = response.user_log;
-            if(userData.is_typing == 1){
+            if(userData.is_typing == 1 && $('#friends-active-status' + <?= isset($friend)? $friend['user_admin_id'] : 0 ?>).length){
               if(userData.is_typing_to == <?= session()->get('loggedUser') ?>){
                 if($('#friend_typing').length) {
                   $('#chat-area').append(`
@@ -138,7 +138,8 @@
                   `);
                 }
                 // $('#chat-area').scrollTop($('#chat-area')[0].scrollHeight);
-                $("#chat-area").animate({ scrollTop: $('#chat-area')[0].scrollHeight }, 'fast');
+                // $("#chat-area").animate({ scrollTop: $('#chat-area')[0].scrollHeight }, 'fast');
+                autoScrollIfAtBottom(71)
               }
               
             } else if (userData.is_typing == 0){
@@ -148,9 +149,11 @@
             }
             scrollOnce();
             if(previous_last_id != last_id){
-              autoScrollIfAtBottom();
+              autoScrollIfAtBottom(71);
               previous_last_id = last_id;
             }
+
+            
 
           },
           
@@ -160,6 +163,27 @@
         
     }
     //------------------------Sending and Receiving Messages End------------------------
+
+    //------------------------Showing timestamp on hover------------------------
+
+    function messageTimestamp(timestamp, messages_id){
+
+      if($(`#chat-datetime${messages_id}`).length > 0){
+        $(`#chat-datetime${messages_id}`).remove();
+      }
+
+      $(`#chat-template${messages_id}`).append(`
+         <p id="chat-datetime${messages_id}" class="chat-datetime">${timestamp}</p>
+      `);
+
+    }
+
+    function messageTimestampRemove(messages_id){
+
+      if($(`#chat-datetime${messages_id}`).length > 0){
+        $(`#chat-datetime${messages_id}`).remove();
+      }
+    }
 
     //------------------------When user is typing start------------------------
 
@@ -300,9 +324,9 @@
     }
 
     //-------------------------------Autoscroll function--------------------------------
-    function autoScrollIfAtBottom() {
+    function autoScrollIfAtBottom(threshold) {
       const $container = $("#chat-area");
-      const scrollThreshold = 71; // Pixels from bottom to consider "at bottom"
+      const scrollThreshold = threshold; // Pixels from bottom to consider "at bottom"
 
       // Check if user is near the bottom
       const isNearBottom = $container.scrollTop() + $container.innerHeight() + scrollThreshold >= $container[0].scrollHeight;
@@ -320,7 +344,92 @@
       }
     }
 
+    // ----------------------------Send Files-----------------------------
+    function selectFiles(e){
+      if(e == "files"){
+        $('#file-input').click();
+      } else if(e == "images"){
+        $('#image-input').click();
+      }
+    }
+
+    // function sendFiles(input){
+    //   const user_id = <?= session()->get('loggedUser'); ?>;
+    //   const friend_id = <?= isset($friend)? $friend['user_admin_id'] : 0 ?>;
+    //   const files = input.files;
+    //   var formData = new FormData();
+
+    //   console.log(6);
+    //   console.log(friend_id);
+
+    //   $.each(files, function(i, file) {
+    //     formData.append('files', file);
+    //   }); 
       
+    //   $.ajax({
+    //     type: "POST",
+    //     url: "messages/upload",
+    //     data:{
+    //       user_id: user_id,
+    //       friend_id: friend_id,
+    //       formData: formData
+    //     },
+    //     processData: false,
+    //     contentType: false,
+
+    //     success: function(response){
+    //       var here = response;
+    //       console.log(here);
+    //       console.log('yes');
+    //     },
+    //     error: function(error){
+    //       console.log('error: ')
+    //     }
+    //     });
+    // }
+
+    //-----------------------------------Chat Info---------------------------------
+    function chatInfo(){
+      isFriendInfoToggled = !isFriendInfoToggled
+
+      // console.log('yes');
+      if(isFriendInfoToggled){
+        document.querySelector('.app').style.removeProperty('grid-template-columns');
+        document.querySelector('.app').style.gridTemplateColumns = '0.15fr 0.7fr 1.5fr 0.5fr';
+
+        document.querySelector('.main-right-info').style.display = 'inline';
+        document.querySelector('.main-right-info').style.visibility = 'visible';
+
+      } else if (!isFriendInfoToggled){
+        document.querySelector('.app').style.removeProperty('grid-template-columns');
+        document.querySelector('.app').style.gridTemplateColumns = '0.15fr 0.7fr 2fr';
+
+        document.querySelector('.main-right-info').style.display = 'none';
+        document.querySelector('.main-right-info').style.visibility = 'hidden';
+      }
+      
+    }  
+
+    function profileInfo(){
+      isProfileInfoToggled = !isProfileInfoToggled
+
+      // console.log('yes');
+      if(isProfileInfoToggled){
+        document.querySelector('.main-left').style.removeProperty('grid-template-columns');
+        document.querySelector('.main-left').style.gridTemplateRows = '0.9fr 2fr 4.2fr';
+
+        document.querySelector('.profile-information').style.display = 'inline';
+        document.querySelector('.profile-information').style.visibility = 'visible';
+
+      } else if (!isProfileInfoToggled){
+        document.querySelector('.main-left').style.removeProperty('grid-template-columns');
+        document.querySelector('.main-left').style.gridTemplateRows = '0.9fr 6.2fr';
+
+        document.querySelector('.profile-information').style.display = 'none';
+        document.querySelector('.profile-information').style.visibility = 'hidden';
+      }
+      
+    } 
   </script>
     <!--
     <script src="<?php echo base_url('public/assets/js/jquery-3.3.1.min.js"'); ?>"></script>

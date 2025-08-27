@@ -28,6 +28,39 @@ class Home extends BaseController
         . view('templates/footer.php');
     }
 
-    
+    public function about(): string
+    {
+        return view('templates/header.php')
+        . view('about.php')
+        . view('templates/footer.php');
+    }
+
+    public function contact(): string
+    {
+        return view('templates/header.php')
+        . view('contact.php')
+        . view('templates/footer.php');
+    }
+
+    public function FAQ(): string
+    {
+        return view('templates/header.php')
+        . view('FAQ.php')
+        . view('templates/footer.php');
+    }
+
+    public function privacy(): string
+    {
+        return view('templates/header.php')
+        . view('privacy-policy.php')
+        . view('templates/footer.php');
+    }
+
+        public function team(): string
+    {
+        return view('templates/header.php')
+        . view('team.php')
+        . view('templates/footer.php');
+    }
 
 }

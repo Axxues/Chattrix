@@ -7,7 +7,10 @@
       <div class="row">
         <div class="col-lg-4 col-md-12 m-md-auto align-self-center">
           <div class="block">
-            <a href="index.html"><img src="<?php echo base_url('public/assets/images/'); ?>logo-alt.png" alt="footer-logo"></a>
+            <div class="homepage-logo-footer">
+							<a class="navbar-brand" href="<?= site_url('/') ?>"><img class="footer-logo" src="<?php echo base_url('public/assets/images/message-svgrepo-com.svg'); ?>" alt="logo"></a>
+							<h3 class="footer-logo-title font-weight-bold">Chattrix</h4>
+						</div>
             <!-- Social Site Icons -->
             <ul class="social-icon list-inline">
               <li class="list-inline-item">
@@ -25,37 +28,21 @@
         <div class="col-lg-2 col-md-3 col-6 mt-5 mt-lg-0">
           <div class="block-2">
             <!-- heading -->
-            <h6>Product</h6>
+            <h6>Home</h6>
             <!-- links -->
             <ul>
-              <li><a href="team.html">Teams</a></li>
-              <li><a href="blog.html">Blogs</a></li>
-              <li><a href="FAQ.html">FAQs</a></li>
+              <li><a href="<?= site_url('/') ?>">Landing</a></li>
             </ul>
           </div>
         </div>
         <div class="col-lg-2 col-md-3 col-6 mt-5 mt-lg-0">
           <div class="block-2">
             <!-- heading -->
-            <h6>Resources</h6>
+            <h6>Join Us</h6>
             <!-- links -->
             <ul>
-              <li><a href="sign-up.html">Singup</a></li>
-              <li><a href="sign-in.html">Login</a></li>
-              <li><a href="blog.html">Blog</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="col-lg-2 col-md-3 col-6 mt-5 mt-lg-0">
-          <div class="block-2">
-            <!-- heading -->
-            <h6>Company</h6>
-            <!-- links -->
-            <ul>
-              <li><a href="career.html">Career</a></li>
-              <li><a href="contact.html">Contact</a></li>
-              <li><a href="team.html">Investor</a></li>
-              <li><a href="privacy.html">Terms</a></li>
+              <li><a href="<?= site_url('sign_up') ?>">Singup</a></li>
+              <li><a href="<?= site_url('sign_in') ?>">Signin</a></li>
             </ul>
           </div>
         </div>
@@ -65,10 +52,11 @@
             <h6>Company</h6>
             <!-- links -->
             <ul>
-              <li><a href="about.html">About</a></li>
-              <li><a href="contact.html">Contact</a></li>
-              <li><a href="team.html">Team</a></li>
-              <li><a href="privacy-policy.html">Privacy Policy</a></li>
+              <li><a href="<?= site_url('team') ?>">Team</a></li>
+              <li><a href="<?= site_url('privacy') ?>">Privacy</a></li>
+              <li><a href="<?= site_url('FAQ') ?>">FAQ</a></li>
+              <li><a href="<?= site_url('about') ?>">About</a></li>
+              <li><a href="<?= site_url('contact') ?>">Contact</a></li>
             </ul>
           </div>
         </div>
@@ -76,11 +64,7 @@
     </div>
   </div>
   <div class="text-center bg-dark py-4">
-    <small class="text-secondary">Copyright &copy; <script>document.write(new Date().getFullYear())</script>. Designed &amp; Developed by <a href="https://themefisher.com/">Themefisher</a></small class="text-secondary">
-  </div>
-
-	<div class="text-center bg-dark py-1">
-   <small> <p>Distributed By <a href="https://themewagon.com/">Themewagon</a></p></small class="text-secondary">
+    <small class="text-secondary">Copyright &copy; <script>document.write(new Date().getFullYear())</script>. Designed &amp; Developed by BSCS 3-A</a></small class="text-secondary">
   </div>
 </footer>
 

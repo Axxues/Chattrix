@@ -20,6 +20,7 @@ class Main extends BaseController
     public function __construct(){
         helper(['url','form']);
     }
+    
     public function chat_page()
     {
         $userModel = new FriendsModel();

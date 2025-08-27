@@ -12,7 +12,10 @@
 					<!-- Content -->
 					<div class="content text-center">
 						<div class="logo">
-							<a href="<?= site_url('landing') ?>"><img src="<?php echo base_url('public/assets/images/'); ?>logo.png" alt=""></a>
+							<div class="homepage-logo">
+								<a class="navbar-brand" href="<?= site_url('/') ?>"><img class="header-logo" src="<?php echo base_url('public/assets/images/message-svgrepo-com.svg'); ?>" alt="logo"></a>
+								<h3 class="header-logo-title font-weight-bold">Chattrix</h4>
+							</div>
 						</div>
 						<div class="title-text">
 							<h3>Sign in to To Your Account</h3>
